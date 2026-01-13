@@ -30,6 +30,7 @@ public class ProductService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
+                .imageUrl(request.getImageUrl())
                 .category(category)
                 .build();
         
@@ -42,6 +43,31 @@ public class ProductService {
                 .map(this::mapToProductResponse)
                 .collect(Collectors.toList());
     }
+    
+    public ProductResponse getProductById(Integer id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        return mapToProductResponse(product);
+    }
+
+    public ProductResponse updateProduct(Integer id, ProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        if (request.getName() != null) product.setName(request.getName());
+        if (request.getDescription() != null) product.setDescription(request.getDescription());
+        if (request.getPrice() != null) product.setPrice(request.getPrice());
+        if (request.getImageUrl() != null) product.setImageUrl(request.getImageUrl());
+        
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+            product.setCategory(category);
+        }
+
+        Product updatedProduct = productRepository.save(product);
+        return mapToProductResponse(updatedProduct);
+    }
 
     private ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()
@@ -49,6 +75,7 @@ public class ProductService {
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .imageUrl(product.getImageUrl())
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .build();
     }

@@ -3,6 +3,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Products from './pages/Products';
 import Landing from './pages/Landing';
+import ProductDetails from './pages/ProductDetails';
 import PlaceOrderModal from './components/PlaceOrderModal';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
       
       <Route path="/register" element={<Register />} />
       <Route path="/products" element={<Products />} />
+      <Route path="/products/:id" element={<ProductDetails />} />
       
       {/* Checkout Route to demonstrate the Place Order Modal */}
       <Route path="/checkout" element={<CheckoutDemo />} />

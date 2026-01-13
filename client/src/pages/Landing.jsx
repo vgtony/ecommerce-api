@@ -1,15 +1,38 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import api from '../api/axios';
 
 function Landing() {
-  const images = [
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80", // Watch
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80", // Headphones
-    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80", // Camera
-    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", // Shoe
-    "https://images.unsplash.com/photo-1585298723682-7115561c51b7?auto=format&fit=crop&w=800&q=80", // Scifi headset
-    "https://images.unsplash.com/photo-1572569028738-411a56106515?auto=format&fit=crop&w=800&q=80", // Fashion
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+
+  // Fetch products on mount to link images to actual IDs
+  useEffect(() => {
+    const fetchFeatured = async () => {
+       try {
+         // In a real app we might fetch /products/featured. 
+         // Here we fetch all (since we just seeded 6) and map them.
+         const response = await api.get('/products');
+         if (response.data && response.data.length > 0) {
+             setFeaturedProducts(response.data.slice(0, 8)); // Take up to 8
+         }
+       } catch (e) {
+         console.log("Could not fetch featured products", e);
+       }
+    };
+    fetchFeatured();
+  }, []);
+
+  // Fallback images if API fails (won't link to products correctly though)
+  const fallbackImages = [
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1585298723682-7115561c51b7?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1572569028738-411a56106515?auto=format&fit=crop&w=800&q=80",
   ];
+
+  const itemsToShow = featuredProducts.length > 0 ? featuredProducts : fallbackImages;
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark transition-colors duration-200 justify-center items-center">
@@ -49,17 +72,24 @@ function Landing() {
         {/* Carousel */}
         <div className="w-full relative overflow-hidden rounded-2xl border-4 border-white dark:border-[#1a212e] shadow-2xl animate-fade-in-up delay-200">
           <div className="flex gap-4 animate-marquee hover:pause">
-            {[...images, ...images].map((src, idx) => (
-              <div key={idx} className="flex-shrink-0 w-64 h-80 relative rounded-xl overflow-hidden group">
+            {[...itemsToShow, ...itemsToShow].map((item, idx) => (
+               <Link 
+                  key={idx} 
+                  to={typeof item === 'object' ? `/products/${item.id}` : '#'} 
+                  className={`flex-shrink-0 w-64 h-80 relative rounded-xl overflow-hidden group ${typeof item !== 'object' ? 'pointer-events-none' : ''}`}
+               >
                  <img 
-                  src={src} 
-                  alt="Product" 
+                  src={typeof item === 'object' ? item.imageUrl : item} 
+                  alt={typeof item === 'object' ? item.name : 'Product'} 
                   className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110" 
                  />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <span className="text-white font-medium">View Product</span>
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                  <h3 className="text-white font-bold leading-tight">{typeof item === 'object' ? item.name : ''}</h3>
+                  <span className="text-primary-300 text-sm font-medium mt-1">
+                    {typeof item === 'object' ? `$${item.price.toFixed(2)}` : ''}
+                  </span>
                  </div>
-              </div>
+              </Link>
             ))}
           </div>
            {/* Fade edges */}
@@ -77,7 +107,7 @@ function Landing() {
         .animate-marquee {
           display: flex;
           width: fit-content;
-          animation: marquee 30s linear infinite;
+          animation: marquee 40s linear infinite;
         }
         .animate-marquee:hover {
           animation-play-state: paused;
