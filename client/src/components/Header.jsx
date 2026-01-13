@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 function Header({ actionButton }) {
-  // Initialize ONLY from localStorage or default to 'light'. 
-  // Do NOT check system preference to ensure consistent default.
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') || 'light';
@@ -14,7 +12,6 @@ function Header({ actionButton }) {
   const location = useLocation();
 
   useEffect(() => {
-    // Explicitly manage the class on the html element
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
@@ -42,7 +39,7 @@ function Header({ actionButton }) {
           <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">ShopName</h2>
         </Link>
         
-        {/* Theme Toggle Button - Right side of ShopName */}
+        {/* Theme Toggle Button */}
         <button 
           onClick={toggleTheme} 
           className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-all cursor-pointer"
@@ -57,7 +54,7 @@ function Header({ actionButton }) {
       <div className="flex flex-1 justify-end gap-8">
         <div className="hidden md:flex items-center gap-9">
           <Link to="/" className={`text-sm font-medium leading-normal transition-colors ${isActive('/') ? 'text-primary font-bold' : 'text-[#0d121b] dark:text-gray-300 hover:text-primary'}`}>Home</Link>
-          <Link to="/products/new" className={`text-sm font-medium leading-normal transition-colors ${isActive('/products/new') ? 'text-primary font-bold' : 'text-[#0d121b] dark:text-gray-300 hover:text-primary'}`}>Create Product</Link>
+          <Link to="/products" className={`text-sm font-medium leading-normal transition-colors ${isActive('/products') ? 'text-primary font-bold' : 'text-[#0d121b] dark:text-gray-300 hover:text-primary'}`}>Products</Link>
           <Link to="#" className="text-[#0d121b] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors">Help</Link>
         </div>
         

@@ -1,8 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
 import Register from './pages/Register';
 import Login from './pages/Login';
-import ProductCreate from './pages/ProductCreate';
+import Products from './pages/Products';
 import PlaceOrderModal from './components/PlaceOrderModal';
 
 function App() {
@@ -12,7 +11,7 @@ function App() {
       <Route path="/" element={<Login />} />
       
       <Route path="/register" element={<Register />} />
-      <Route path="/products/new" element={<ProductCreate />} />
+      <Route path="/products" element={<Products />} />
       
       {/* Checkout Route to demonstrate the Place Order Modal */}
       <Route path="/checkout" element={<CheckoutDemo />} />
@@ -22,6 +21,8 @@ function App() {
     </Routes>
   );
 }
+
+import { useState } from 'react';
 
 // Wrapper to display the modal as a standalone page for demonstration
 function CheckoutDemo() {

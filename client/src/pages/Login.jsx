@@ -1,9 +1,44 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import api from '../api/axios';
 
 function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.post('/auth/authenticate', formData);
+      const token = response.data.token;
+      
+      if (token) {
+        localStorage.setItem('token', token);
+        navigate('/products'); // Redirect to products page
+      } else {
+         setError('Login failed: No token received.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loginButton = (
     <Link to="/register">
@@ -26,13 +61,27 @@ function Login() {
               <p className="text-[#4c669a] dark:text-gray-400 text-base font-normal leading-normal">Log in to manage your store and orders.</p>
             </div>
 
+            {error && (
+              <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+                {error}
+              </div>
+            )}
+
             {/* Login Form */}
-            <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
               
               {/* Email Field */}
               <label className="flex flex-col gap-2">
                 <span className="text-[#0d121b] dark:text-gray-200 text-sm font-medium">Email Address</span>
-                <input className="form-input w-full rounded-lg text-[#0d121b] dark:text-white border border-[#cfd7e7] dark:border-gray-700 bg-[#f8f9fc] dark:bg-[#101622] focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder:text-[#4c669a] dark:placeholder:text-gray-500 transition-colors duration-200" placeholder="john.doe@example.com" type="email"/>
+                <input 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="form-input w-full rounded-lg text-[#0d121b] dark:text-white border border-[#cfd7e7] dark:border-gray-700 bg-[#f8f9fc] dark:bg-[#101622] focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder:text-[#4c669a] dark:placeholder:text-gray-500 transition-colors duration-200" 
+                  placeholder="john.doe@example.com" 
+                  type="email"
+                  required
+                />
               </label>
 
               {/* Password Field */}
@@ -43,9 +92,13 @@ function Login() {
                 </div>
                 <div className="relative">
                   <input 
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
                     className="form-input w-full rounded-lg text-[#0d121b] dark:text-white border border-[#cfd7e7] dark:border-gray-700 bg-[#f8f9fc] dark:bg-[#101622] focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder:text-[#4c669a] dark:placeholder:text-gray-500 transition-colors duration-200" 
                     placeholder="••••••••" 
                     type={showPassword ? "text" : "password"}
+                    required
                   />
                   <button 
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4c669a] dark:text-gray-400 transition-all duration-200 hover:text-primary hover:drop-shadow-[0_0_8px_rgba(19,91,236,0.8)] hover:scale-110" 
@@ -59,10 +112,11 @@ function Login() {
 
               {/* Submit Button */}
               <button 
-                className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-lg bg-primary h-14 px-4 text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/30 transition-all duration-300 ease-out hover:bg-primary hover:shadow-[0_0_25px_rgba(19,91,236,0.6)] hover:-translate-y-1 active:scale-[0.98] active:translate-y-0 active:shadow-primary/20" 
+                className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-lg bg-primary h-14 px-4 text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/30 transition-all duration-300 ease-out hover:bg-primary hover:shadow-[0_0_25px_rgba(19,91,236,0.6)] hover:-translate-y-1 active:scale-[0.98] active:translate-y-0 active:shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed" 
                 type="submit"
+                disabled={loading}
               >
-                 Log In
+                 {loading ? 'Logging In...' : 'Log In'}
               </button>
             </form>
 
