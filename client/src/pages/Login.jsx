@@ -1,0 +1,89 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Header from '../components/Header';
+
+function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const loginButton = (
+    <Link to="/register">
+      <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/30 transition-all duration-300 hover:bg-primary hover:shadow-[0_0_20px_rgba(19,91,236,0.6)] hover:-translate-y-0.5 active:scale-95">
+        <span>Sign Up</span>
+      </button>
+    </Link>
+  );
+
+  return (
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark transition-colors duration-200">
+      <div className="layout-container flex h-full grow flex-col">
+        <Header actionButton={loginButton} />
+
+        <main className="flex flex-1 items-center justify-center py-12 px-4 transition-colors duration-200">
+          <div className="w-full max-w-[520px] bg-white dark:bg-[#1a212e] rounded-xl shadow-sm border border-[#e7ebf3] dark:border-gray-800 p-8 md:p-10 transition-colors duration-200">
+            {/* Headline Section */}
+            <div className="text-center mb-8">
+              <h1 className="text-[#0d121b] dark:text-white tracking-tight text-[32px] font-bold leading-tight pb-2">Welcome Back</h1>
+              <p className="text-[#4c669a] dark:text-gray-400 text-base font-normal leading-normal">Log in to manage your store and orders.</p>
+            </div>
+
+            {/* Login Form */}
+            <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+              
+              {/* Email Field */}
+              <label className="flex flex-col gap-2">
+                <span className="text-[#0d121b] dark:text-gray-200 text-sm font-medium">Email Address</span>
+                <input className="form-input w-full rounded-lg text-[#0d121b] dark:text-white border border-[#cfd7e7] dark:border-gray-700 bg-[#f8f9fc] dark:bg-[#101622] focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder:text-[#4c669a] dark:placeholder:text-gray-500 transition-colors duration-200" placeholder="john.doe@example.com" type="email"/>
+              </label>
+
+              {/* Password Field */}
+              <label className="flex flex-col gap-2">
+                <div className="flex justify-between">
+                    <span className="text-[#0d121b] dark:text-gray-200 text-sm font-medium">Password</span>
+                    <a href="#" className="text-xs text-primary hover:underline">Forgot password?</a>
+                </div>
+                <div className="relative">
+                  <input 
+                    className="form-input w-full rounded-lg text-[#0d121b] dark:text-white border border-[#cfd7e7] dark:border-gray-700 bg-[#f8f9fc] dark:bg-[#101622] focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder:text-[#4c669a] dark:placeholder:text-gray-500 transition-colors duration-200" 
+                    placeholder="••••••••" 
+                    type={showPassword ? "text" : "password"}
+                  />
+                  <button 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4c669a] dark:text-gray-400 transition-all duration-200 hover:text-primary hover:drop-shadow-[0_0_8px_rgba(19,91,236,0.8)] hover:scale-110" 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <span className="material-symbols-outlined text-xl">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
+              </label>
+
+              {/* Submit Button */}
+              <button 
+                className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-lg bg-primary h-14 px-4 text-white text-base font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/30 transition-all duration-300 ease-out hover:bg-primary hover:shadow-[0_0_25px_rgba(19,91,236,0.6)] hover:-translate-y-1 active:scale-[0.98] active:translate-y-0 active:shadow-primary/20" 
+                type="submit"
+              >
+                 Log In
+              </button>
+            </form>
+
+            {/* Footer Link */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-[#4c669a] dark:text-gray-400">
+                  Don't have an account? <Link to="/register" className="text-primary font-bold hover:underline">Sign up</Link>
+              </p>
+            </div>
+          </div>
+        </main>
+         {/* Decorative Elements */}
+         <div className="fixed bottom-10 right-10 hidden lg:block opacity-10">
+          <img alt="Abstract background pattern" className="w-64 h-64 rounded-full blur-3xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtOjisHspveMuWkbmcpPcX3W145lymI-QrwSjXYvmk81KxbXcpYBbmHhScZanK-P3ubvYhK2zMnU0m823BU1SD7VW66gkh7hwXJIhvcx2PEgv3WaKt7Pd4xfVbbIWQjc0Isxh0EvDjoZv7TMunsV8HrgbTZ_ZYV1LF7Hk85f1wOT_tK66o1qbycRUxOjGWzuTjRpPmEC76qe1AP_g4-351KWK_ctnf9e5kzf078LdbDJU8EC7sC_eBDcD5c-GsihYzG_WuISWWV21K"/>
+        </div>
+        <div className="fixed top-20 left-10 hidden lg:block opacity-10">
+          <div className="w-48 h-48 bg-primary rounded-full blur-3xl"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Login;

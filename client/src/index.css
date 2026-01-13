@@ -1,9 +1,35 @@
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
 @import "tailwindcss";
+@plugin "@tailwindcss/forms";
 
-/* Retaining the reset just in case, though Tailwind handles most of it */
+/* Force dark mode to rely on the .dark class instead of system preference */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #135bec;
+  --color-background-light: #f6f6f8;
+  --color-background-dark: #101622;
+  
+  --font-display: "Inter", sans-serif;
+}
+
+/* Base styles */
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
+  background-color: var(--color-background-light);
+  color: #0d121b;
+}
+
+/* Dark mode overrides (using the class) */
+:root.dark {
+  background-color: var(--color-background-dark);
+  color: #ffffff;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+/* Ensure inputs inherit font */
+input, textarea, select, button {
+  font-family: inherit;
 }
