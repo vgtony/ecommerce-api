@@ -2,13 +2,15 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Products from './pages/Products';
+import Landing from './pages/Landing';
 import PlaceOrderModal from './components/PlaceOrderModal';
 
 function App() {
   return (
     <Routes>
-      {/* Landing Page is now Login */}
-      <Route path="/" element={<Login />} />
+      {/* Landing Page */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
       
       <Route path="/register" element={<Register />} />
       <Route path="/products" element={<Products />} />
