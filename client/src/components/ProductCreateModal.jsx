@@ -6,12 +6,25 @@ function ProductCreateModal({ isOpen, onClose, onProductCreated, productToEdit }
     name: '',
     description: '',
     price: '',
-    stock: '',
+    stockQuantity: 50, // Default stock
     categoryId: 1,
     imageUrl: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get('/categories');
+        setCategories(response.data);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Initialize form data when entering edit mode or resetting
   useEffect(() => {
@@ -21,8 +34,8 @@ function ProductCreateModal({ isOpen, onClose, onProductCreated, productToEdit }
                 name: productToEdit.name || '',
                 description: productToEdit.description || '',
                 price: productToEdit.price || '',
-                stock: '', // API response doesn't seem to include stock yet?
-                categoryId: 1, // Assume 1 for now if not available or forced
+                stockQuantity: productToEdit.stockQuantity || 0, 
+                categoryId: productToEdit.categoryId || (categories.length > 0 ? categories[0].id : ''),
                 imageUrl: productToEdit.imageUrl || ''
             });
         } else {
@@ -31,13 +44,13 @@ function ProductCreateModal({ isOpen, onClose, onProductCreated, productToEdit }
                 name: '',
                 description: '',
                 price: '',
-                stock: '',
-                categoryId: 1,
+                stockQuantity: 50,
+                categoryId: categories.length > 0 ? categories[0].id : '',
                 imageUrl: ''
             });
         }
     }
-  }, [isOpen, productToEdit]);
+  }, [isOpen, productToEdit, categories]);
 
   if (!isOpen) return null;
 
@@ -55,8 +68,9 @@ function ProductCreateModal({ isOpen, onClose, onProductCreated, productToEdit }
             name: formData.name,
             description: formData.description,
             price: parseFloat(formData.price),
+            stockQuantity: parseInt(formData.stockQuantity),
             imageUrl: formData.imageUrl,
-            categoryId: 1 // Forced to 1
+            categoryId: formData.categoryId
         };
         
         if (productToEdit) {
@@ -129,6 +143,22 @@ function ProductCreateModal({ isOpen, onClose, onProductCreated, productToEdit }
                 ></textarea>
               </label>
 
+              <label className="flex flex-col gap-2">
+                <span className="text-[#0d121b] dark:text-gray-200 text-sm font-medium">Category</span>
+                <select 
+                    name="categoryId"
+                    value={formData.categoryId}
+                    onChange={handleChange}
+                    className="form-input w-full rounded-lg text-[#0d121b] dark:text-white border border-[#cfd7e7] dark:border-gray-700 bg-[#f8f9fc] dark:bg-[#101622] focus:border-primary focus:ring-1 focus:ring-primary h-11 px-4 text-sm transition-colors duration-200 cursor-pointer"
+                    required
+                >
+                    <option value="" disabled>Select a category</option>
+                    {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                </select>
+              </label>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label className="flex flex-col gap-2">
                   <span className="text-[#0d121b] dark:text-gray-200 text-sm font-medium">Price ($)</span>
@@ -143,15 +173,16 @@ function ProductCreateModal({ isOpen, onClose, onProductCreated, productToEdit }
                     required
                   />
                 </label>
-                 <label className="flex flex-col gap-2">
+                <label className="flex flex-col gap-2">
                   <span className="text-[#0d121b] dark:text-gray-200 text-sm font-medium">Stock Quantity</span>
                   <input 
-                    name="stock"
-                    value={formData.stock}
+                    name="stockQuantity"
+                    value={formData.stockQuantity}
                     onChange={handleChange}
                     className="form-input w-full rounded-lg text-[#0d121b] dark:text-white border border-[#cfd7e7] dark:border-gray-700 bg-[#f8f9fc] dark:bg-[#101622] focus:border-primary focus:ring-1 focus:ring-primary h-11 px-4 text-sm placeholder:text-[#4c669a] dark:placeholder:text-gray-500 transition-colors duration-200" 
                     placeholder="100" 
                     type="number"
+                    min="0"
                   />
                 </label>
               </div>

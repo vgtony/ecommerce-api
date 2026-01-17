@@ -20,4 +20,6 @@ public class ProductRequest {
     private String imageUrl;
     
     private Integer categoryId;
+    
+    private Integer stockQuantity;
 }

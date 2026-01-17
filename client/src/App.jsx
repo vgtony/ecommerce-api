@@ -1,32 +1,75 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Products from './pages/Products';
 import Landing from './pages/Landing';
 import ProductDetails from './pages/ProductDetails';
 import PlaceOrderModal from './components/PlaceOrderModal';
+import AdminDashboard from './pages/AdminDashboard';
+import CartSidebar from './components/CartSidebar';
+import { CartProvider } from './context/CartContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Orders from './pages/Orders';
 
 function App() {
+  const location = useLocation();
+  const role = localStorage.getItem('role');
+  const token = localStorage.getItem('token');
+  
+  // Show sidebar only if logged in as CUSTOMER
+  const showSidebar = token && role === 'CUSTOMER' || role === 'USER'; // Allow USER just in case
+  
+  // Dynamic padding if sidebar is visible
+  const contentStyle = showSidebar ? { paddingRight: '320px' } : {};
+
   return (
-    <Routes>
-      {/* Landing Page */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      
-      <Route path="/register" element={<Register />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/products/:id" element={<ProductDetails />} />
-      
-      {/* Checkout Route to demonstrate the Place Order Modal */}
-      <Route path="/checkout" element={<CheckoutDemo />} />
-      
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <CartProvider>
+      <div className="min-h-screen w-full" style={contentStyle}>
+          <Routes>
+            {/* Landing Page */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            
+            <Route path="/register" element={<Register />} />
+            <Route path="/products" element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            } />
+            <Route path="/products/:id" element={
+              <ProtectedRoute>
+                <ProductDetails />
+              </ProtectedRoute>
+            } />
+            <Route path="/orders" element={
+              <ProtectedRoute>
+                <Orders />
+              </ProtectedRoute>
+            } />
+            
+            {/* Checkout Route to demonstrate the Place Order Modal */}
+            <Route path="/checkout" element={
+              <ProtectedRoute>
+                <CheckoutDemo />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          
+          {showSidebar && <CartSidebar />}
+      </div>
+    </CartProvider>
   );
 }
 
-import { useState } from 'react';
 
 // Wrapper to display the modal as a standalone page for demonstration
 function CheckoutDemo() {

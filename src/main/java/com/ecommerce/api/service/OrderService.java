@@ -40,6 +40,13 @@ public class OrderService {
             var product = productRepository.findById(itemRequest.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Product not found"));
             
+            if (product.getStockQuantity() < itemRequest.getQuantity()) {
+                throw new IllegalArgumentException("Insufficient stock for product: " + product.getName());
+            }
+
+            product.setStockQuantity(product.getStockQuantity() - itemRequest.getQuantity());
+            productRepository.save(product);
+
             var orderItem = OrderItem.builder()
                     .order(order)
                     .product(product)
@@ -53,5 +60,27 @@ public class OrderService {
 
         order.setTotalAmount(total);
         orderRepository.save(order);
+    }
+    @Transactional(readOnly = true)
+    public java.util.List<com.ecommerce.api.dto.OrderResponse> getUserOrders(String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return orderRepository.findByUserId(user.getId()).stream()
+                .map(order -> com.ecommerce.api.dto.OrderResponse.builder()
+                        .id(order.getId())
+                        .createdAt(order.getCreatedAt())
+                        .totalAmount(order.getTotalAmount())
+                        .status("COMPLETED")
+                        .items(order.getItems().stream()
+                                .map(item -> com.ecommerce.api.dto.OrderItemDto.builder()
+                                        .productId(item.getProduct().getId())
+                                        .productName(item.getProduct().getName())
+                                        .quantity(item.getQuantity())
+                                        .price(item.getPrice())
+                                        .build())
+                                .collect(java.util.stream.Collectors.toList()))
+                        .build())
+                .collect(java.util.stream.Collectors.toList());
     }
 }

@@ -11,7 +11,7 @@ function Register() {
     lastname: '',
     email: '',
     password: '',
-    role: 'USER' // Default to USER/COSTUMER based on enum usually, checking DTO: private Role role;
+    role: 'customer' // Default to customer
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

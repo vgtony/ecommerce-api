@@ -28,7 +28,16 @@ function Login() {
       
       if (token) {
         localStorage.setItem('token', token);
-        navigate('/products'); // Redirect to products page
+        localStorage.setItem('role', response.data.role);
+        localStorage.setItem('firstname', response.data.firstname || 'User');
+        localStorage.setItem('lastname', response.data.lastname || '');
+        
+        const role = response.data.role;
+        if (role === 'ADMIN') {
+            navigate('/admin');
+        } else {
+            navigate('/');
+        }
       } else {
          setError('Login failed: No token received.');
       }

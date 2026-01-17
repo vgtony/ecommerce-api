@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import api from '../api/axios';
+import { useCart } from '../context/CartContext';
 
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     fetchProduct();
@@ -87,9 +89,20 @@ function ProductDetails() {
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-0.5">Price</p>
                                 <span className="text-3xl font-bold text-primary">${product.price.toFixed(2)}</span>
+                                <div className="mt-2">
+                                     {product.stockQuantity === 0 ? (
+                                         <span className="text-sm font-bold text-red-500">Out of Stock</span>
+                                     ) : (
+                                         <span className="text-sm font-bold text-green-500">{product.stockQuantity} In Stock</span>
+                                     )}
+                                </div>
                             </div>
-                            <button className="h-12 px-8 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all">
-                                Add to Cart
+                            <button 
+                                onClick={() => addToCart(product)}
+                                disabled={product.stockQuantity === 0}
+                                className={`h-12 px-8 text-white rounded-lg font-bold shadow-lg transition-all ${product.stockQuantity === 0 ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary hover:bg-primary/90 shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5'}`}
+                            >
+                                {product.stockQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
                         </div>
                     </div>

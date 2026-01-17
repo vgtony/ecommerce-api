@@ -36,4 +36,10 @@ public class ProductController {
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Integer id, @RequestBody ProductRequest request) {
         return ResponseEntity.ok(service.updateProduct(id, request));
     }
+
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    public ResponseEntity<String> uploadProducts(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        service.uploadProducts(file);
+        return ResponseEntity.ok("Products uploaded successfully");
+    }
 }

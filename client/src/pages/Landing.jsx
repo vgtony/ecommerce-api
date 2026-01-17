@@ -1,28 +1,43 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import Header from '../components/Header'; // Reusing Header for authenticated view
+import UserMenu from '../components/UserMenu';
+import CategoryCarousel from '../components/CategoryCarousel';
 
 function Landing() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-  // Fetch products on mount to link images to actual IDs
   useEffect(() => {
+    // Check auth
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+
     const fetchFeatured = async () => {
        try {
-         // In a real app we might fetch /products/featured. 
-         // Here we fetch all (since we just seeded 6) and map them.
          const response = await api.get('/products');
          if (response.data && response.data.length > 0) {
-             setFeaturedProducts(response.data.slice(0, 8)); // Take up to 8
+             setFeaturedProducts(response.data.slice(0, 8)); 
          }
        } catch (e) {
          console.log("Could not fetch featured products", e);
        }
     };
+    const fetchCategories = async () => {
+        try {
+            const response = await api.get('/categories');
+            setCategories(response.data);
+        } catch(e) {
+            console.log("Could not fetch categories", e);
+        }
+    }
     fetchFeatured();
+    fetchCategories();
   }, []);
 
-  // Fallback images if API fails (won't link to products correctly though)
   const fallbackImages = [
     "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
@@ -33,6 +48,60 @@ function Landing() {
   ];
 
   const itemsToShow = featuredProducts.length > 0 ? featuredProducts : fallbackImages;
+
+  const logoutButton = <UserMenu />;
+
+  // Authenticated Dashboard
+  if (isAuthenticated) {
+     return (
+       <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark transition-colors duration-200">
+         <div className="layout-container flex h-full grow flex-col">
+            <Header actionButton={logoutButton} />
+            
+            <main className="flex flex-1 flex-col py-8 px-6 md:px-10 transition-colors duration-200 gap-12">
+                
+                {/* 1. Carousel Section */}
+                <section>
+                    <h2 className="text-2xl font-bold text-[#0d121b] dark:text-white mb-6">Featured Products</h2>
+                    <div className="w-full relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-[#1a212e]">
+                        <div className="flex gap-4 animate-marquee hover:pause py-6">
+                            {[...itemsToShow, ...itemsToShow].map((item, idx) => (
+                                <Link 
+                                    key={idx} 
+                                    to={typeof item === 'object' ? `/products/${item.id}` : '#'} 
+                                    className={`flex-shrink-0 w-64 h-80 relative rounded-xl overflow-hidden group ${typeof item !== 'object' ? 'pointer-events-none' : ''} mx-2`}
+                                >
+                                    <img 
+                                        src={typeof item === 'object' ? item.imageUrl : item} 
+                                        alt={typeof item === 'object' ? item.name : 'Product'} 
+                                        className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110" 
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                                        <h3 className="text-white font-bold leading-tight line-clamp-2">{typeof item === 'object' ? item.name : ''}</h3>
+                                        <span className="text-primary-300 text-sm font-medium mt-1">
+                                            {typeof item === 'object' ? `$${item.price.toFixed(2)}` : ''}
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* 2. Categories Section */}
+                <section>
+                    <h2 className="text-2xl font-bold text-[#0d121b] dark:text-white mb-6">Shop by Category</h2>
+                    <div className="w-full">
+                        <CategoryCarousel categories={categories} />
+                    </div>
+                </section>
+                
+            </main>
+         </div>
+
+       </div>
+     );
+  }
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark transition-colors duration-200 justify-center items-center">
@@ -97,33 +166,15 @@ function Landing() {
            <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none"></div>
         </div>
 
+        {/* Categories Carousel */}
+        <div className="w-full mt-16 mb-20 animate-fade-in-up delay-200">
+             <h2 className="text-2xl font-bold text-[#0d121b] dark:text-white mb-6 text-center">Shop by Category</h2>
+             <CategoryCarousel categories={categories} />
+        </div>
+
       </div>
       
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          display: flex;
-          width: fit-content;
-          animation: marquee 40s linear infinite;
-        }
-        .animate-marquee:hover {
-          animation-play-state: paused;
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+
     </div>
   );
 }

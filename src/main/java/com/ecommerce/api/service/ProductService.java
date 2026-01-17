@@ -32,6 +32,7 @@ public class ProductService {
                 .price(request.getPrice())
                 .imageUrl(request.getImageUrl())
                 .category(category)
+                .stockQuantity(request.getStockQuantity() == null ? 0 : request.getStockQuantity())
                 .build();
         
         var savedProduct = productRepository.save(product);
@@ -57,7 +58,9 @@ public class ProductService {
         if (request.getName() != null) product.setName(request.getName());
         if (request.getDescription() != null) product.setDescription(request.getDescription());
         if (request.getPrice() != null) product.setPrice(request.getPrice());
+        if (request.getPrice() != null) product.setPrice(request.getPrice());
         if (request.getImageUrl() != null) product.setImageUrl(request.getImageUrl());
+        if (request.getStockQuantity() != null) product.setStockQuantity(request.getStockQuantity());
         
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
@@ -69,6 +72,51 @@ public class ProductService {
         return mapToProductResponse(updatedProduct);
     }
 
+    public void uploadProducts(org.springframework.web.multipart.MultipartFile file) {
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean isFirstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) { isFirstLine = false; continue; }
+                // regex to split by comma but ignore commas inside quotes
+                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                
+                if(data.length < 4) continue; 
+                
+                String name = cleanField(data[0]);
+                String desc = cleanField(data[1]);
+                java.math.BigDecimal price = new java.math.BigDecimal(cleanField(data[2]));
+                String catName = cleanField(data[3]);
+                String img = data.length > 4 ? cleanField(data[4]) : null;
+
+                Category category = categoryRepository.findByName(catName);
+                if (category == null) {
+                    category = categoryRepository.save(Category.builder().name(catName).description(catName).build());
+                }
+
+                Product product = Product.builder()
+                        .name(name)
+                        .description(desc)
+                        .price(price)
+                        .category(category)
+                        .imageUrl(img)
+                        .stockQuantity(10) // Default stock for uploaded products
+                        .build();
+                productRepository.save(product);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to parse CSV file: " + e.getMessage());
+        }
+    }
+
+    private String cleanField(String field) {
+        String trimmed = field.trim();
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+            return trimmed.substring(1, trimmed.length() - 1);
+        }
+        return trimmed;
+    }
+
     private ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()
                 .id(product.getId())
@@ -77,6 +125,8 @@ public class ProductService {
                 .price(product.getPrice())
                 .imageUrl(product.getImageUrl())
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .stockQuantity(product.getStockQuantity() != null ? product.getStockQuantity() : 20)
                 .build();
     }
 }

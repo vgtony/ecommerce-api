@@ -13,4 +13,6 @@ public class ProductResponse {
     private BigDecimal price;
     private String imageUrl;
     private String categoryName;
+    private Integer categoryId;
+    private Integer stockQuantity;
 }

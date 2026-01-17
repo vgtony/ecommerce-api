@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import com.ecommerce.api.dto.OrderResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -26,5 +29,12 @@ public class OrderController {
     ) {
         service.placeOrder(request, userDetails.getUsername());
         return ResponseEntity.ok("Order placed successfully");
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getOrders(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(service.getUserOrders(userDetails.getUsername()));
     }
 }
